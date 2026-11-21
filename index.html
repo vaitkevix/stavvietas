@@ -445,9 +445,21 @@ const REQ = { termins: false, ph: 'Piem. pēc remonta — rūpīgi notīrīt 2. 
 function noticePrint(x) {
   const C = S.D.cfg, no = x.laiks_no || C.laiksNo, lidz = x.laiks_lidz || C.laiksLidz;
   const t = String(C.zina || '').replace(/\{datums\}/g, lvLong(x.datums)).replace(/\{no\}/g, no).replace(/\{lidz\}/g, lidz).replace(/\{adrese\}/g, x.adrese);
+  const logo = '<svg width="44" height="44" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="#17201c"/><rect x="7" y="7" width="9" height="9" rx="2.5" fill="#d6e8e1"/><rect x="18" y="7" width="9" height="9" rx="2.5" fill="#f4e4b4"/><rect x="7" y="18" width="9" height="9" rx="2.5" fill="#d8e6f2"/><rect x="18" y="18" width="9" height="9" rx="2.5" fill="#e2ddf2"/></svg>';
   const w = window.open('', '_blank'); if (!w) return toast('Atļaujiet uznirstošos logus, lai izdrukātu', 'err');
-  w.document.write(`<!doctype html><html lang="lv"><head><meta charset="utf-8"><title>Paziņojums · ${esc(x.adrese)}</title><style>body{font-family:Manrope,Arial,sans-serif;margin:0;padding:48px;color:#111}h1{font-size:44px;margin:0 0 8px;letter-spacing:-.02em}h2{font-size:22px;margin:0 0 36px;color:#444}.big{font-size:30px;font-weight:800;margin:0 0 28px;padding:18px 22px;border:4px solid #111;border-radius:18px}p{font-size:22px;line-height:1.5}small{display:block;margin-top:48px;color:#666;font-size:14px}@media print{body{padding:24px}}</style></head>
-    <body><h1>PAZIŅOJUMS</h1><h2>${esc(x.adrese)} · pazemes stāvvieta</h2><div class="big">${esc(lvLong(x.datums))}, ${esc(no)}–${esc(lidz)}</div><p>${esc(t)}</p><small>SIA SELECTUM HOME</small><script>setTimeout(()=>print(),300)<\/script></body></html>`);
+  w.document.write(`<!doctype html><html lang="lv"><head><meta charset="utf-8"><title>Paziņojums · ${esc(x.adrese)}</title><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&display=swap" rel="stylesheet"><style>
+    @page{size:A4;margin:16mm}*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    body{font-family:Manrope,-apple-system,"Segoe UI",Arial,sans-serif;color:#17201c;margin:0;padding:32px}
+    .top{display:flex;align-items:center;gap:12px;margin:0 0 22px}.top b{display:block;font-size:16px;font-weight:800}.top small{color:#6d7672;font-weight:700;font-size:13px}
+    .band{background:#f4e4b4;border-radius:22px;padding:28px 30px;margin:0 0 22px}.band h1{margin:0;font-size:52px;font-weight:800;letter-spacing:-.03em;line-height:1}.band p{margin:8px 0 0;font-size:20px;font-weight:700;color:#4a534f}
+    .when{background:#17201c;color:#fff;border-radius:22px;padding:24px 30px;margin:0 0 22px}.when small{display:block;font-size:14px;font-weight:700;opacity:.7;text-transform:uppercase;letter-spacing:.06em}.when b{display:block;font-size:34px;font-weight:800;letter-spacing:-.02em;margin-top:4px}
+    p.t{font-size:22px;line-height:1.5;font-weight:600;margin:0 0 22px}.card{background:#f3f5f4;border-radius:18px;padding:18px 22px;font-size:17px;font-weight:700}
+    .foot{display:flex;justify-content:space-between;border-top:1px solid #dfe5e2;margin-top:40px;padding-top:10px;font-size:12px;color:#6d7672}@media print{body{padding:0}}</style></head>
+    <body><div class="top">${logo}<div><b>SELECTUM HOME</b><small>Paziņojums iedzīvotājiem</small></div></div>
+    <div class="band"><h1>PAZIŅOJUMS</h1><p>${esc(x.adrese)} · pazemes stāvvieta</p></div>
+    <div class="when"><small>Stāvvietas mazgāšana</small><b>${esc(lvLong(x.datums).replace(/^./, c => c.toUpperCase()))}, ${esc(no)}–${esc(lidz)}</b></div>
+    <p class="t">${esc(t)}</p>
+    <div class="foot"><span>SIA SELECTUM HOME</span><span>© VAITKEVIX, SIA</span></div><script>setTimeout(()=>print(),700)<\/script></body></html>`);
   w.document.close();
 }
 const DONE = { before: true, start: true, startL: 'Sākt mazgāšanu', whysNote: true,
