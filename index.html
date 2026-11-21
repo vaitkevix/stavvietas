@@ -189,14 +189,17 @@ const ICO = {
 const ico = (k) => `<span class="dot"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICO[k]}</svg></span>`;
 
 function toast(t, kind) { document.querySelectorAll('.toast').forEach(x => x.remove()); const el = document.createElement('div'); el.className = 'toast' + (kind === 'err' ? ' err' : ''); el.textContent = t; document.body.appendChild(el); setTimeout(() => el.remove(), 3200); }
+const NET = 'Nav interneta vai vājš signāls — mēģiniet vēlreiz';
 async function api(action, data) {
-  const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ action, pin: S.pin }, data || {})) });
-  const j = await r.json().catch(() => ({ ok: false, error: 'Serveris neatbild' }));
+  const ac = new AbortController(), tm = setTimeout(() => ac.abort(), action === 'done' ? 90000 : 25000);   // bildes augšupielāde ilgāka
+  let r; try { r = await fetch(API, { method: 'POST', signal: ac.signal, headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ action, pin: S.pin }, data || {})) }); }
+  catch (e) { const er = new Error(NET); er.code = 'net'; throw er; } finally { clearTimeout(tm); }
+  const j = await r.json().catch(() => ({ ok: false, error: 'Serveris neatbild — mēģiniet vēlreiz', code: 'net' }));
   if (!j.ok) { const e = new Error(j.error || 'Kļūda'); e.code = j.code; throw e; }
   return j;
 }
 function sheet(html) { closeSheet(); const b = document.createElement('div'); b.className = 'sheet-bg'; b.id = 'sheetBg'; b.innerHTML = `<div class="sheet" role="dialog" aria-modal="true">${html}</div>`;
-  b.addEventListener('click', e => { if (e.target === b || e.target.closest('[data-x]')) closeSheet(); }); document.body.appendChild(b); return b.firstChild; }
+  b.addEventListener('click', e => { if (e.target.closest('[data-x]') || (e.target === b && !b.dataset.keep)) closeSheet(); }); document.body.appendChild(b); return b.firstChild; }
 function closeSheet() { const b = $('sheetBg'); if (b) b.remove(); }
 const X = '<button class="ib" data-x aria-label="Aizvērt"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>';
 const busy = (b, t) => { b.disabled = true; b.dataset.t = b.textContent; b.textContent = t; };
@@ -281,13 +284,20 @@ function shrink(file, max) {
 }
 const CAM = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
 const J = (s) => { try { return JSON.parse(s || '{}') || {}; } catch (e) { return {}; } };
+const GAL = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg>';
+let PH_BUSY = 0;   // bildes vēl apstrādājas — «Izdarīts» gaida
 function photoBox(s, sel, arr, max) {
-  const box = s.querySelector(sel), inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.multiple = true; inp.setAttribute('capture', 'environment'); inp.hidden = true; box.after(inp);
-  const draw = () => { box.innerHTML = arr.map((p, i) => `<div class="ph" style="background-image:url('${p}')"><button type="button" data-rm="${i}" aria-label="Noņemt bildi">×</button></div>`).join('') + (arr.length < max ? `<button type="button" class="add" data-add>${CAM}Bilde</button>` : ''); };
-  box.onclick = (e) => { const rm = e.target.closest('[data-rm]'); if (rm) { arr.splice(+rm.dataset.rm, 1); draw(); return; } if (e.target.closest('[data-add]')) inp.click(); };
-  inp.onchange = async () => { for (const f of [...inp.files].slice(0, max - arr.length)) { try { arr.push(await shrink(f, 1400)); } catch (err) { toast(err.message, 'err'); } } inp.value = ''; draw(); };
+  const box = s.querySelector(sel), mk = (cap) => { const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*'; i.multiple = true; if (cap) i.setAttribute('capture', 'environment'); i.hidden = true; box.after(i); return i; };
+  const cam = mk(true), gal = mk(false);
+  const draw = () => { box.innerHTML = arr.map((p, i) => `<div class="ph" style="background-image:url('${p}')"><button type="button" data-rm="${i}" aria-label="Noņemt bildi">×</button></div>`).join('') + (arr.length < max ? `<button type="button" class="add" data-add="cam">${CAM}Uzņemt</button><button type="button" class="add" data-add="gal">${GAL}No galerijas</button>` : ''); };
+  box.onclick = (e) => { const rm = e.target.closest('[data-rm]'); if (rm) { arr.splice(+rm.dataset.rm, 1); draw(); return; } const a = e.target.closest('[data-add]'); if (a) (a.dataset.add === 'cam' ? cam : gal).click(); };
+  const on = async (inp) => { PH_BUSY++; try { for (const f of [...inp.files].slice(0, max - arr.length)) { try { arr.push(await shrink(f, 1400)); } catch (err) { toast(err.message, 'err'); } } } finally { PH_BUSY--; } inp.value = ''; draw(); };
+  cam.onchange = () => on(cam); gal.onchange = () => on(gal);
   draw();
 }
+/* Navigācija uz adresi */
+function navBtns(o, adrese) { const q = o && o.lat ? o.lat + ',' + o.lng : String(adrese || '').replace(/^\s*(j|vn[iī])\s*\|\s*/i, '') + ', Latvija';
+  return `<div style="display:flex;gap:8px;margin:0 0 12px"><a class="pill" href="https://waze.com/ul?${o && o.lat ? 'll=' + q : 'q=' + encodeURIComponent(q)}&navigate=yes" target="_blank" rel="noopener">Braukt · Waze</a><a class="pill" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(q)}" target="_blank" rel="noopener">Google Maps</a></div>`; }
 const thumbs = (ids, alt) => String(ids || '').split(',').filter(Boolean).map(p => `<a href="${IMG.replace('w400', 'w1600') + encodeURIComponent(p)}" target="_blank" rel="noopener"><img src="${IMG + encodeURIComponent(p)}" alt="${alt}"></a>`).join('');
 const nowHM = () => new Date().toTimeString().slice(0, 5);
 const mins = (a, b) => { if (!/^\d\d:\d\d$/.test(a || '') || !/^\d\d:\d\d$/.test(b || '')) return 0; let m = (+b.slice(0, 2) * 60 + +b.slice(3)) - (+a.slice(0, 2) * 60 + +a.slice(3)); if (m < 0) m += 1440; return m; };
@@ -323,7 +333,7 @@ const reqLine = (x) => x.avots === 'pieteikums' ? `<div class="card sand" style=
 function openVisit(id) {
   const x = S.D.visits.find(v => v.id === id); if (!x) return;
   const o = S.objBy[x.anorm] || {}, C = S.D.cfg, od = J(o.dati), rd = J(x.dati);
-  const head = `<div class="hd"><h3>${esc(x.adrese)}</h3>${X}</div>${reqLine(x)}
+  const head = `<div class="hd"><h3>${esc(x.adrese)}</h3>${X}</div>${reqLine(x)}${x.statuss !== 'done' ? navBtns(o, x.adrese) : ''}
     <div class="card ${APP.acc}" style="margin:0 0 12px"><div style="display:flex;flex-wrap:wrap;gap:8px">${DONE.chips(x, o, od, rd)}${x.brigade ? `<span class="chip" style="background:var(--surf)">${esc(x.brigade)}</span>` : ''}
       </div>${o.piezime ? `<p style="margin:10px 0 0;font-weight:700">${esc(o.piezime)}</p>` : ''}
       ${o.piekluve ? `<details style="margin:10px 0 0"><summary style="cursor:pointer;font-weight:800;font-size:14px">Piekļuve (kodi, atslēgas)</summary><p style="margin:6px 0 0;font-size:13.5px;font-weight:700;line-height:1.45">${esc(o.piekluve)}</p></details>` : ''}</div>`;
@@ -344,7 +354,7 @@ function openVisit(id) {
     const s = sheet(head + tools + `<p style="font-weight:800;margin:0 0 8px">${esc(DONE.waitText(x))}</p>${!can('izpilditajs') ? '<p style="font-weight:700;color:var(--ink2);margin:0">Jums ir skatīšanās tiesības.</p>' : ''}<div class="acts" style="grid-template-columns:1fr"><button class="btn-lt" id="vObj">Objekta kartiņa</button></div>`);
     DONE.bindTools(s, x); s.querySelector('#vObj').onclick = () => objCard(o); return;
   }
-  const P = { before: [], after: [], why: '' };
+  const P = (S.draft = S.draft || {})[id] || (S.draft[id] = { before: [], after: [], why: '' });   // nejauši aizverot, bildes nepazūd
   const whys = APP.whys || ['Nav piekļuves', 'Tehnika', 'Nepaspēju'];
   const s = sheet(head + tools + (DONE.start ? (x.sakums ? `<p style="font-weight:800;margin:0 0 10px" id="vStarted">Sākts ${esc(x.sakums)}</p>` : `<button class="pill dk big" id="vStart" style="width:100%;margin:0 0 12px">${esc(DONE.startL || 'Sākt darbu')}</button>`) : '') + `
     ${DONE.before ? `<div class="f"><span class="lb">Bilde pirms darba${C.photoBefore ? ' · obligāta' : ''}</span><div class="photos" id="phB"></div></div>` : ''}
@@ -353,21 +363,24 @@ function openVisit(id) {
     <div class="f"><label for="vNote">Piezīme vadītājam</label><input id="vNote" placeholder="Piem. bojāts…"></div>
     <div class="f"><span class="lb">${esc(DONE.cantL || 'Nevar izpildīt? Adrese pārcelsies pati')}</span><div class="chips" id="why">${whys.map(w => `<button type="button" data-w="${w}">${w}</button>`).join('')}</div></div>
     <div class="acts"><button class="btn-rose" id="vCant">Nevar</button><button class="btn-dk" id="vDone">${esc(APP.doneBtn)}</button></div>`);
+  s.parentElement.dataset.keep = '1';   // fona pieskāriens neaizver darba logu
   DONE.bindTools(s, x); DONE.bind(s, x, o, od, rd);
+  if (P.why) s.querySelectorAll('#why button').forEach(z => z.classList.toggle('on', z.dataset.w === P.why));
   if (DONE.before) photoBox(s, '#phB', P.before, 4); photoBox(s, '#phA', P.after, 4);
   const st = s.querySelector('#vStart'); if (st) st.onclick = async () => { busy(st, '…'); try { await api('start', { id }); x.sakums = nowHM(); st.outerHTML = `<p style="font-weight:800;margin:0 0 10px">Sākts ${esc(x.sakums)}</p>`; toast('Sākts'); DONE.onStart && DONE.onStart(s, x); } catch (err) { toast(err.message, 'err'); unbusy(st); } };
   s.querySelector('#why').onclick = (e) => { const b = e.target.closest('[data-w]'); if (!b) return; P.why = P.why === b.dataset.w ? '' : b.dataset.w; s.querySelectorAll('#why button').forEach(z => z.classList.toggle('on', z.dataset.w === P.why)); };
   s.querySelector('#vDone').onclick = async (e) => {
     if (DONE.before && C.photoBefore && !P.before.length && !x.foto_pirms) return toast('Pievienojiet bildi pirms darba', 'err');
+    if (PH_BUSY) return toast('Bilde vēl apstrādājas — pagaidiet sekundi', 'err');
     if (C.photoReq && !P.after.length) return toast('Pievienojiet bildi pēc darba', 'err');
     const iz = DONE.read(s, x); if (iz === false) return;
     busy(e.target, 'Augšupielādē…');
-    try { await api('done', { id, photos: P.after, photosBefore: P.before, izpilde: iz, sakums: x.sakums || '', piezime: s.querySelector('#vNote').value.trim() }); closeSheet(); toast(APP.doneL + ' ✓'); await load(); } catch (err) { toast(err.message, 'err'); unbusy(e.target); }
+    try { await api('done', { id, photos: P.after, photosBefore: P.before, izpilde: iz, sakums: x.sakums || '', piezime: s.querySelector('#vNote').value.trim() }); delete S.draft[id]; closeSheet(); toast(APP.doneL + ' ✓'); await load(); } catch (err) { toast(err.message, 'err'); unbusy(e.target); }
   };
   s.querySelector('#vCant').onclick = async (e) => {
     if (!P.why) { s.querySelector('#why').scrollIntoView({ behavior: 'smooth', block: 'center' }); return toast('Izvēlieties iemeslu', 'err'); }
     busy(e.target, '…');
-    try { await api('cant', { id, iemesls: P.why }); closeSheet(); toast(APP.cantDone || 'Pārcelts uz nākamo darba dienu'); await load(); } catch (err) { toast(err.message, 'err'); unbusy(e.target); }
+    try { await api('cant', { id, iemesls: P.why }); delete S.draft[id]; closeSheet(); toast(APP.cantDone || 'Pārcelts uz nākamo darba dienu'); await load(); } catch (err) { toast(err.message, 'err'); unbusy(e.target); }
   };
 }
 
@@ -429,7 +442,7 @@ const OBJX = { fields: (o) => { const d = J(o.dati); return `<div class="row2"><
 async function drawMonth(v) {
   const D = S.D, ym = S.ym, [y, m] = ym.split('-').map(Number);
   $('hdTitle').textContent = MON[m - 1][0].toUpperCase() + MON[m - 1].slice(1) + ' ' + y;
-  if (!S.month || S.month.ym !== ym) { v.innerHTML = '<div class="skel"></div><div class="skel"></div>'; try { S.month = { ym, visits: (await api('month', { ym })).visits }; } catch (err) { v.innerHTML = `<div class="card empty">${esc(err.message)}</div>`; return; } }
+  if (!S.month || S.month.ym !== ym) { v.innerHTML = '<div class="skel"></div><div class="skel"></div>'; try { const vs = (await api('month', { ym })).visits; if (S.tab !== 'month' || S.ym !== ym) return; S.month = { ym, visits: vs }; } catch (err) { v.innerHTML = `<div class="card empty">${esc(err.message)}</div>`; return; } }
   const V = S.month.visits, by = {}; V.forEach(x => (by[x.datums] = by[x.datums] || []).push(x));
   const first = ym + '-01', pad = dow(first) - 1, n = new Date(Date.UTC(y, m, 0)).getUTCDate(), t = D.today;
   const cells = []; for (let i = 0; i < pad; i++) cells.push('<div class="d blank"></div>');
@@ -613,7 +626,14 @@ function drawRules(v) {
 (function () { applyTheme(ls.get('sh_theme'));
   const h = location.hash.slice(1); if (h && ['today', 'month', 'objs', 'rules', 'map'].indexOf(h) !== -1) S.tab = h;
   if (!S.pin) return showGate('');
-  load().catch(err => { if (err.code === 'auth') { ls.del(PINK); S.pin = ''; showGate('PIN vairs nederīgs vai nav piekļuves'); } else { showGate(err.message); } });
+  const first = () => load().catch(err => { if (err.code === 'auth') { ls.del(PINK); S.pin = ''; showGate('PIN vairs nederīgs vai nav piekļuves'); }
+    else if (err.code === 'net' && !S.D) { $('vGate').hidden = true; $('vApp').hidden = false; $('view').innerHTML = `<div class="card empty">${esc(NET)}<br><button class="pill dk" id="reTry" style="margin-top:12px">Mēģināt vēlreiz</button></div>`; $('reTry').onclick = first; }
+    else showGate(err.message); });
+  first();
+  /* Atjaunojas pati: atgriežoties lietotnē (>60 s) un ik 2 min, kamēr nav atvērts logs */
+  let last = Date.now(); const auto = () => { if (!S.D || $('sheetBg') || document.hidden || Date.now() - last < 60000) return; last = Date.now(); load().catch(() => 0); };
+  document.addEventListener('visibilitychange', auto); setInterval(auto, 120000);
+  addEventListener('online', () => { last = 0; auto(); });
 })();
 </script>
 </body>
