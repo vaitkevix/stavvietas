@@ -660,7 +660,7 @@ function drawRules(v) {
 /* ---------- start ---------- */
 (function () { applyTheme(ls.get('sh_theme'));
   const h = location.hash.slice(1); if (h && ['today', 'month', 'objs', 'rules', 'map'].indexOf(h) !== -1) S.tab = h;
-  if (!S.pin) return showGate('');
+  if (!S.pin && !ls.get('sh_guest')) return showGate('');   // sh_guest — skatīšanās bez ielogošanās (portāls)
   const first = () => load().catch(err => { if (err.code === 'auth') { ls.del(PINK); S.pin = ''; showGate('PIN vairs nederīgs vai nav piekļuves'); }
     else if (err.code === 'net' && !S.D) { $('vGate').hidden = true; $('vApp').hidden = false; $('view').innerHTML = `<div class="card empty">${esc(NET)}<br><button class="pill dk" id="reTry" style="margin-top:12px">Mēģināt vēlreiz</button></div>`; $('reTry').onclick = first; }
     else showGate(err.message); });
