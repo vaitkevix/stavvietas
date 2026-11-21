@@ -208,18 +208,53 @@ const unbusy = (b) => { b.disabled = false; if (b.dataset.t) b.textContent = b.d
 /* ---------- ieeja ---------- */
 function showGate(msg) { $('vApp').hidden = true; $('tabs').hidden = true; $('vGate').hidden = false; $('gErr').textContent = msg || ''; setTimeout(() => $('gPin').focus(), 100); }
 $('gateForm').onsubmit = async (e) => { e.preventDefault(); S.pin = $('gPin').value.trim(); if (!S.pin) return; try { await load(); ls.set(PINK, S.pin); } catch (err) { showGate(err.message); } };
-function logout() { ls.del(PINK); S.pin = ''; S.D = null; closeSheet(); showGate(''); }
+function logout() { ls.del(BOOTK); ls.del(PINK); S.pin = ''; S.D = null; closeSheet(); showGate(''); }
 
+/* ---------- Bezsaiste: pēdējie dati telefonā + atzīmju rinda, kas aizsūtās pati ---------- */
+const OK_ = APP.svc, BOOTK = 'shd_boot_' + OK_;
+let IDB = null;
+function idb() { return IDB || (IDB = new Promise((res, rej) => { const r = indexedDB.open('sh_offline', 1); r.onupgradeneeded = () => r.result.createObjectStore('q', { keyPath: 'k' }); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); })); }
+const qTx = async (mode, fn) => { const d = await idb(); return new Promise((res, rej) => { const t = d.transaction('q', mode), st = t.objectStore('q'), out = fn(st); t.oncomplete = () => res(out && out.result); t.onerror = () => rej(t.error); }); };
+const qAll = async () => { try { return ((await qTx('readonly', st => st.getAll())) || []).filter(x => x.app === OK_ && x.pin === S.pin).sort((a, b) => a.ts - b.ts); } catch (e) { return []; } };
+const qPut = (x) => qTx('readwrite', st => st.put(x)), qDel = (k) => qTx('readwrite', st => st.delete(k));
+/* Darbība ar serveri; ja nav interneta — saglabā telefonā un aizsūta vēlāk */
+async function act(action, data) {
+  try { return await api(action, data); }
+  catch (e) { if (e.code !== 'net' || !window.indexedDB) throw e;
+    await qPut({ k: OK_ + ':' + data.id + ':' + action, app: OK_, pin: S.pin, action, data, ts: Date.now() }); S.qn = (await qAll()).length; return { queued: true }; }
+}
+async function flushQ() {
+  if (flushQ.busy || !navigator.onLine || !S.pin) return; flushQ.busy = true; let n = 0;
+  try { for (const x of await qAll()) { try { await api(x.action, x.data); await qDel(x.k); n++; } catch (e) { if (e.code === 'net') break; await qDel(x.k); toast('Neizdevās nosūtīt (' + x.action + '): ' + e.message, 'err'); } } }
+  finally { flushQ.busy = false; }
+  S.qn = (await qAll()).length; if (n) { toast('Nosūtīts no telefona: ' + n); load().catch(() => 0); } else offBar();
+}
+/* Rindā esošās atzīmes parāda sarakstā uzreiz */
+async function applyQ(r) {
+  const Q = await qAll(); S.qn = Q.length;
+  Q.forEach(x => { const v = (r.visits || []).find(z => z.id === x.data.id); if (!v) return;
+    if (x.action === 'start' && !v.sakums) v.sakums = new Date(x.ts).toTimeString().slice(0, 5);
+    if (x.action === 'done') { v.statuss = 'done'; v.laiks = 'gaida internetu'; v.izpilditajs = (r.me || {}).name || ''; v.pending = 1; }
+    if (x.action === 'cant') { v.statuss = 'cant'; v.iemesls = (x.data.iemesls || '') + ' · gaida internetu'; v.pending = 1; } });
+}
+function offBar() {
+  let b = $('offBar'); if (!b) { b = document.createElement('div'); b.id = 'offBar'; b.style.cssText = 'margin:0 0 12px;padding:10px 14px;border-radius:18px;background:var(--sand);font-weight:800;font-size:13.5px;display:flex;gap:10px;align-items:center;justify-content:space-between'; $('view').before(b); }
+  const t = [S.off ? 'Bezsaistē · dati no ' + new Date(S.off).toLocaleTimeString('lv-LV', { hour: '2-digit', minute: '2-digit' }) : '', S.qn ? S.qn + (S.qn === 1 ? ' atzīme gaida' : ' atzīmes gaida') + ' internetu' : ''].filter(Boolean).join(' · ');
+  b.hidden = !t; b.innerHTML = t ? `<span>${esc(t)}</span>${S.qn && navigator.onLine ? '<button class="pill" id="qGo" style="min-height:36px">Sūtīt tagad</button>' : ''}` : '';
+  const g = $('qGo'); if (g) g.onclick = flushQ;
+}
 async function load() {
   const t = S.D ? S.D.today : '';
-  const r = await api('boot', t ? { from: addDays(t, -7), to: addDays(t, 35) } : {});
+  let r; try { r = await api('boot', t ? { from: addDays(t, -7), to: addDays(t, 35) } : {}); S.off = 0; try { ls.set(BOOTK, JSON.stringify({ t: Date.now(), r })); } catch (e) {} }
+  catch (e) { const c = e.code === 'net' && JSON.parse(ls.get(BOOTK) || 'null'); if (!c) throw e; r = c.r; S.off = c.t; }
+  await applyQ(r);
   S.D = r; if (!S.day) S.day = r.today; if (!S.ym) S.ym = r.today.slice(0, 7);
   S.objBy = {}; r.objects.forEach(o => S.objBy[o.anorm] = o);
   if (SNOW && (!S.call || !r.calls.some(c => c.id === S.call))) { const c = r.calls.find(c => c.statuss === 'aktivs') || r.calls.find(c => c.statuss === 'gaida') || r.calls[0]; S.call = c ? c.id : ''; }
   $('vGate').hidden = true; $('vApp').hidden = false; $('tabs').hidden = false;
   $('hdSub').textContent = r.me.name + ' · ' + (ROLE[r.me.role] || r.me.role);
   $('btnMe').textContent = r.me.name.replace(/^SIA\s+/i, '').split(/\s+/).map(x => x[0]).join('').slice(0, 2).toUpperCase();
-  drawTabs(); if (S.tab === 'month') S.month = null; draw();
+  drawTabs(); if (S.tab === 'month') S.month = null; draw(); offBar();
 }
 function drawTabs() {
   const T = [['today', SNOW ? 'Maršruts' : 'Šodien'], ['month', SNOW ? 'Izsaukumi' : 'Grafiks'], ['objs', 'Objekti'], ['map', 'Karte']].concat(can('admin') ? [['rules', 'Noteikumi']] : []);
@@ -367,7 +402,7 @@ function openVisit(id) {
   DONE.bindTools(s, x); DONE.bind(s, x, o, od, rd);
   if (P.why) s.querySelectorAll('#why button').forEach(z => z.classList.toggle('on', z.dataset.w === P.why));
   if (DONE.before) photoBox(s, '#phB', P.before, 4); photoBox(s, '#phA', P.after, 4);
-  const st = s.querySelector('#vStart'); if (st) st.onclick = async () => { busy(st, '…'); try { await api('start', { id }); x.sakums = nowHM(); st.outerHTML = `<p style="font-weight:800;margin:0 0 10px">Sākts ${esc(x.sakums)}</p>`; toast('Sākts'); DONE.onStart && DONE.onStart(s, x); } catch (err) { toast(err.message, 'err'); unbusy(st); } };
+  const st = s.querySelector('#vStart'); if (st) st.onclick = async () => { busy(st, '…'); try { await act('start', { id }); x.sakums = nowHM(); st.outerHTML = `<p style="font-weight:800;margin:0 0 10px">Sākts ${esc(x.sakums)}</p>`; toast('Sākts'); DONE.onStart && DONE.onStart(s, x); } catch (err) { toast(err.message, 'err'); unbusy(st); } };
   s.querySelector('#why').onclick = (e) => { const b = e.target.closest('[data-w]'); if (!b) return; P.why = P.why === b.dataset.w ? '' : b.dataset.w; s.querySelectorAll('#why button').forEach(z => z.classList.toggle('on', z.dataset.w === P.why)); };
   s.querySelector('#vDone').onclick = async (e) => {
     if (DONE.before && C.photoBefore && !P.before.length && !x.foto_pirms) return toast('Pievienojiet bildi pirms darba', 'err');
@@ -375,12 +410,12 @@ function openVisit(id) {
     if (C.photoReq && !P.after.length) return toast('Pievienojiet bildi pēc darba', 'err');
     const iz = DONE.read(s, x); if (iz === false) return;
     busy(e.target, 'Augšupielādē…');
-    try { await api('done', { id, photos: P.after, photosBefore: P.before, izpilde: iz, sakums: x.sakums || '', piezime: s.querySelector('#vNote').value.trim() }); delete S.draft[id]; closeSheet(); toast(APP.doneL + ' ✓'); await load(); } catch (err) { toast(err.message, 'err'); unbusy(e.target); }
+    try { await act('done', { id, photos: P.after, photosBefore: P.before, izpilde: iz, sakums: x.sakums || '', piezime: s.querySelector('#vNote').value.trim() }); delete S.draft[id]; closeSheet(); toast(APP.doneL + ' ✓'); await load(); } catch (err) { toast(err.message, 'err'); unbusy(e.target); }
   };
   s.querySelector('#vCant').onclick = async (e) => {
     if (!P.why) { s.querySelector('#why').scrollIntoView({ behavior: 'smooth', block: 'center' }); return toast('Izvēlieties iemeslu', 'err'); }
     busy(e.target, '…');
-    try { await api('cant', { id, iemesls: P.why }); delete S.draft[id]; closeSheet(); toast(APP.cantDone || 'Pārcelts uz nākamo darba dienu'); await load(); } catch (err) { toast(err.message, 'err'); unbusy(e.target); }
+    try { await act('cant', { id, iemesls: P.why }); delete S.draft[id]; closeSheet(); toast(APP.cantDone || 'Pārcelts uz nākamo darba dienu'); await load(); } catch (err) { toast(err.message, 'err'); unbusy(e.target); }
   };
 }
 
@@ -629,11 +664,11 @@ function drawRules(v) {
   const first = () => load().catch(err => { if (err.code === 'auth') { ls.del(PINK); S.pin = ''; showGate('PIN vairs nederīgs vai nav piekļuves'); }
     else if (err.code === 'net' && !S.D) { $('vGate').hidden = true; $('vApp').hidden = false; $('view').innerHTML = `<div class="card empty">${esc(NET)}<br><button class="pill dk" id="reTry" style="margin-top:12px">Mēģināt vēlreiz</button></div>`; $('reTry').onclick = first; }
     else showGate(err.message); });
-  first();
+  first().then(() => flushQ()).catch(() => 0);
   /* Atjaunojas pati: atgriežoties lietotnē (>60 s) un ik 2 min, kamēr nav atvērts logs */
   let last = Date.now(); const auto = () => { if (!S.D || $('sheetBg') || document.hidden || Date.now() - last < 60000) return; last = Date.now(); load().catch(() => 0); };
   document.addEventListener('visibilitychange', auto); setInterval(auto, 120000);
-  addEventListener('online', () => { last = 0; auto(); });
+  addEventListener('online', () => { last = 0; flushQ(); auto(); }); setInterval(() => { if (S.qn) flushQ(); }, 60000);
 })();
 </script>
 </body>
