@@ -159,7 +159,7 @@ button{cursor:pointer}
 'use strict';
 /* Lietotnes iestatījumi */
 const APP = {"svc": "stav", "mode": "interval", "name": "Pazemes stāvvietas", "acc": "sand", "unit": "m²", "qtyL": "Platība, m²", "qtyPh": "Piem. 2500", "doneL": "Nomazgāts", "doneBtn": "Nomazgāts", "lower": "mazgāšana", "weather": [], "wxL": "", "maxInt": 400, "notice": true, "veidiObj": false, "actL": "Mazgāt šo stāvvietu", "notePh": "Piem. vārtu pults pie apsardzes", "objHelp": "Grafikā nonāk stāvvietas ar m² > 0. Ievadiet cik reizes gadā mazgāt pēc līguma. Datumu grafiks liek ne agrāk kā pēc paziņošanas termiņa — atzīmējiet, kad iedzīvotāji paziņoti.", "whys": ["Auto nav izbraukuši", "Nav piekļuves", "Tehnika", "Nepaspēju"]};
-const API = 'https://aizvietosana-api.vaitkevix.workers.dev/' + APP.svc, IMG = 'https://aizvietosana-api.vaitkevix.workers.dev/img?sz=w400&id=';
+const API = 'https://vaitkevix.cloud/sh/api/' + APP.svc, IMG = 'https://vaitkevix.cloud/sh/api/img?sz=w400&id=';
 const SNOW = APP.mode === 'snow', PINK = 'shd_pin';
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
