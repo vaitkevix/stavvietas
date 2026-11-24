@@ -225,7 +225,13 @@ async function act(action, data) {
 }
 async function flushQ() {
   if (flushQ.busy || !navigator.onLine || !S.pin) return; flushQ.busy = true; let n = 0;
-  try { for (const x of await qAll()) { try { await api(x.action, x.data); await qDel(x.k); n++; } catch (e) { if (e.code === 'net') break; await qDel(x.k); toast('Neizdevās nosūtīt (' + x.action + '): ' + e.message, 'err'); } } }
+  /* Dzēš tikai, kad serveris pieņēma (ok / jau izpildīts). Kļūdas gadījumā atzīme paliek telefonā un tiks sūtīta vēlreiz. */
+  const kad = (ts) => { const d = new Date(ts), p = (v) => String(v).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()); };
+  try { for (const x of await qAll()) { try { await api(x.action, Object.assign({}, x.data, x.action === 'done' || x.action === 'cant' ? { kad: kad(x.ts) } : {})); await qDel(x.k); n++; }
+    catch (e) { if (e.code === 'net') break;
+      x.tries = (x.tries || 0) + 1; x.err = e.message; await qPut(x);
+      if (e.code === 'auth') { toast('PIN nomainīts — ielogojieties vēlreiz. Atzīmes saglabātas telefonā.', 'err'); break; }
+      toast('Nav nosūtīts (' + x.action + '): ' + e.message + ' — atzīme saglabāta telefonā, mēģināsim vēlreiz', 'err'); } } }
   finally { flushQ.busy = false; }
   S.qn = (await qAll()).length; if (n) { toast('Nosūtīts no telefona: ' + n); load().catch(() => 0); } else offBar();
 }
