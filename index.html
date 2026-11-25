@@ -516,7 +516,7 @@ async function drawMonth(v) {
         <div class="log">${(D.logs || []).slice(0, 12).map(l => `<div><b>${esc(l.teksts)}</b><span>${esc(l.laiks)}</span></div>`).join('') || '<div><span>Vēl nekas nav pārcelts.</span></div>'}</div></div></div></div>`;
   v.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { const dt = new Date(Date.UTC(y, m - 1 + +b.dataset.m, 1)); S.ym = dt.toISOString().slice(0, 7); draw(); });
   v.querySelector('.cal').onclick = (e) => { const b = e.target.closest('[data-d]'); if (!b) return; S.day = b.dataset.d;
-    if (S.day < addDays(t, -7) || S.day > addDays(t, 35)) { api('boot', { from: S.day, to: S.day }).then(r => { S.D.visits = S.D.visits.concat(r.visits.filter(x => !S.D.visits.some(z => z.id === x.id))); S.tab = 'today'; drawTabs(); draw(); }); return; }
+    if (S.day < addDays(t, -7) || S.day > addDays(t, 35)) { api('boot', { from: S.day, to: S.day }).then(r => { S.D.visits = S.D.visits.concat(r.visits.filter(x => !S.D.visits.some(z => z.id === x.id))); S.tab = 'today'; drawTabs(); draw(); }).catch(e => toast(e.message, 'err')); return; }
     S.tab = 'today'; drawTabs(); draw(); scrollTo(0, 0); };
   const rb = $('btnRep'); if (rb) rb.onclick = () => reportSheet(S.ym);
   const rp = $('btnReplan2'); if (rp) rp.onclick = async () => { busy(rp, '…'); try { const r = await api('replan'); toast('+' + r.added + ' jauni, ' + r.moved + ' pārcelti'); S.month = null; await load(); } catch (err) { toast(err.message, 'err'); unbusy(rp); } };
