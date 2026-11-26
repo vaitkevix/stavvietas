@@ -14,6 +14,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <!-- SH | Pazemes stāvvietas — Pazemes stāvvietu mazgāšanas grafiks, iedzīvotāju paziņošana iepriekš, izpilde ar bildi. © VAITKEVIX, SIA -->
 <style>
+:root{--r-base:14px;--r-xs:calc(var(--r-base)*.5);--r-sm:calc(var(--r-base)*.72);--r-md:var(--r-base);--r-lg:calc(var(--r-base)*1.43);--r-xl:calc(var(--r-base)*2);--r-pill:999px}/*SH rādiusi: maini --r-base*/
+
 :root{--bg:#f1f4f2;--surf:#fff;--surf2:#f3f5f4;--ink:#17201c;--ink2:#4a534f;--ink3:#6d7672;--dark:#17201c;--ondark:#fff;
   --mint:#d6e8e1;--sand:#f4e4b4;--sky:#d8e6f2;--rose:#f5dbe3;--lilac:#e2ddf2;--ok:#2f5d45;--warn:#6b4a00;--bad:#8a2a3b}
 :root[data-theme="dark"]{--bg:#0b120f;--surf:#151d1a;--surf2:#1b2521;--ink:#eef2ef;--ink2:#b4bdb8;--ink3:#8b958f;--dark:#eef2ef;--ondark:#0b120f;
@@ -27,47 +29,47 @@ button{cursor:pointer}
 .top{display:flex;align-items:center;gap:12px;margin:0 0 14px}
 .top .t{flex:1;min-width:0}
 .top small{display:block;font-size:13px;font-weight:700;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.top .lg{width:44px;height:44px;border-radius:14px;background:var(--mint);color:var(--ink);display:grid;place-items:center;flex:none}
+.top .lg{width:44px;height:44px;border-radius:var(--r-md,14px);background:var(--mint);color:var(--ink);display:grid;place-items:center;flex:none}
 .top .bn{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:clamp(17px,4.6vw,20px);font-weight:800;letter-spacing:-.03em;line-height:1.15}
 .pt{margin:0 0 14px;font-size:clamp(26px,4vw,40px);font-weight:800;letter-spacing:-.03em;line-height:1.05}
 .ib{width:44px;height:44px;border-radius:50%;border:0;background:var(--surf);display:grid;place-items:center;flex:none;color:var(--ink)}
 .ib.dk{background:var(--dark);color:var(--ondark)}
-.card{border-radius:28px;background:var(--surf);padding:16px 18px}
+.card{border-radius:var(--r-xl,28px);background:var(--surf);padding:16px 18px}
 .mint{background:var(--mint)}.sand{background:var(--sand)}.sky{background:var(--sky)}.rose{background:var(--rose)}.lilac{background:var(--lilac)}
 .sec{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:20px 0 10px}
 .sec h2{margin:0;font-size:22px;font-weight:800;letter-spacing:-.02em}
-.pill{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border:0;border-radius:999px;background:var(--surf);font-size:14px;font-weight:800;text-decoration:none;color:var(--ink);white-space:nowrap}
+.pill{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border:0;border-radius:var(--r-pill,999px);background:var(--surf);font-size:14px;font-weight:800;text-decoration:none;color:var(--ink);white-space:nowrap}
 .pill.dk{background:var(--dark);color:var(--ondark)}
 .pill.big{min-height:56px;padding:0 22px;font-size:16px}
-.seg{display:flex;gap:6px;padding:6px;border-radius:999px;background:var(--surf);overflow-x:auto;scrollbar-width:none}
+.seg{display:flex;gap:6px;padding:6px;border-radius:var(--r-pill,999px);background:var(--surf);overflow-x:auto;scrollbar-width:none}
 .seg::-webkit-scrollbar{display:none}
-.seg button{min-height:40px;padding:0 16px;border:0;border-radius:999px;background:transparent;font-size:14px;font-weight:800;white-space:nowrap}
+.seg button{min-height:40px;padding:0 16px;border:0;border-radius:var(--r-pill,999px);background:transparent;font-size:14px;font-weight:800;white-space:nowrap}
 .seg button.on{background:var(--dark);color:var(--ondark)}
-.banner{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:24px;margin:0 0 12px}
+.banner{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:var(--r-xl,28px);margin:0 0 12px}
 .banner b{display:block;font-size:14px;font-weight:800}.banner div>span{display:block;font-size:12.5px;font-weight:700;color:var(--ink2)}
 .banner .dot{display:grid;place-items:center;color:var(--ink)}
 .dot{width:40px;height:40px;border-radius:50%;background:var(--surf);display:grid;place-items:center;flex:none}
 .prog .row{display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:var(--ink2)}
 .prog .big{display:flex;align-items:baseline;gap:6px;margin-top:4px}.prog .big b{font-size:44px;font-weight:800;letter-spacing:-.03em;line-height:1}.prog .big span{font-size:16px;font-weight:800;color:var(--ink2)}
-.bar{height:8px;border-radius:999px;background:rgba(23,32,28,.15);margin-top:12px;overflow:hidden}.bar i{display:block;height:100%;border-radius:999px;background:var(--ink)}
+.bar{height:8px;border-radius:var(--r-pill,999px);background:rgba(23,32,28,.15);margin-top:12px;overflow:hidden}.bar i{display:block;height:100%;border-radius:var(--r-pill,999px);background:var(--ink)}
 .list{display:flex;flex-direction:column;gap:8px}
-.stop{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:22px;background:var(--surf);border:0;width:100%;text-align:left}
+.stop{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--r-xl,28px);background:var(--surf);border:0;width:100%;text-align:left}
 .stop .n{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;flex:none;font-size:14px;font-weight:800;background:var(--surf2)}
 .stop .tx{flex:1;min-width:0}.stop .tx b{display:block;font-size:14.5px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .stop .tx span{display:block;font-size:12.5px;font-weight:700;color:var(--ink2)}
-.chip{flex:none;font-size:12px;font-weight:800;padding:6px 10px;border-radius:999px;background:var(--surf2)}
-.chip.wrap{flex:1 1 100%;white-space:normal;border-radius:14px;line-height:1.4}
+.chip{flex:none;font-size:12px;font-weight:800;padding:6px 10px;border-radius:var(--r-pill,999px);background:var(--surf2)}
+.chip.wrap{flex:1 1 100%;white-space:normal;border-radius:var(--r-md,14px);line-height:1.4}
 .s-done .n{background:var(--mint)}.s-done .chip{color:var(--ok)}
 .s-moved{background:var(--sand)}.s-moved .n,.s-moved .chip{background:var(--surf)}.s-moved .chip{color:var(--warn)}
 .s-cant .n{background:var(--rose)}.s-cant .chip{color:var(--bad)}
 .empty{padding:28px 18px;text-align:center;font-weight:700;color:var(--ink3)}
-.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:20;width:min(560px,calc(100% - 32px));display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:4px;padding:6px;border-radius:999px;background:var(--surf);box-shadow:0 8px 28px -12px rgba(16,32,26,.4)}
-.tabs button{min-height:48px;border:0;border-radius:999px;background:transparent;font-size:13.5px;font-weight:800}
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:20;width:min(560px,calc(100% - 32px));display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:4px;padding:6px;border-radius:var(--r-pill,999px);background:var(--surf);box-shadow:0 8px 28px -12px rgba(16,32,26,.4)}
+.tabs button{min-height:48px;border:0;border-radius:var(--r-pill,999px);background:transparent;font-size:13.5px;font-weight:800}
 .tabs button.on{background:var(--dark);color:var(--ondark)}
 /* kalendārs */
 .cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
 .cal .wd{font-size:12px;font-weight:800;color:var(--ink3);text-align:center;padding:4px 0}
-.cal .d{min-height:84px;border-radius:16px;padding:8px;border:0;text-align:left;display:flex;flex-direction:column;gap:2px;background:var(--surf2)}
+.cal .d{min-height:84px;border-radius:var(--r-lg,20px);padding:8px;border:0;text-align:left;display:flex;flex-direction:column;gap:2px;background:var(--surf2)}
 .cal .d b{font-size:15px;font-weight:800}.cal .d span{font-size:12px;font-weight:800}.cal .d small{font-size:11px;font-weight:700;color:var(--ink2)}
 .cal .d.we{background:transparent;opacity:.55}.cal .d.blank{visibility:hidden}
 .cal .d.done{background:var(--mint)}.cal .d.rain{background:var(--sky)}.cal .d.got{background:var(--sand)}
@@ -76,44 +78,44 @@ button{cursor:pointer}
 .legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:12.5px;font-weight:700;color:var(--ink2)}
 .legend i{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:6px;vertical-align:-1px}
 .grid2{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}.grid2>.main{flex:999 1 560px;min-width:0}.grid2>.side{flex:1 1 300px;min-width:0}
-.log{display:flex;flex-direction:column;gap:8px}.log div{padding:10px 12px;border-radius:16px;background:var(--surf)}
+.log{display:flex;flex-direction:column;gap:8px}.log div{padding:10px 12px;border-radius:var(--r-lg,20px);background:var(--surf)}
 .log b{display:block;font-size:13.5px;font-weight:800}.log span{font-size:12px;font-weight:700;color:var(--ink2)}
 /* objekti */
-.search{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}.search input{flex:1 1 220px;height:48px;border:0;border-radius:999px;background:var(--surf);padding:0 18px;font-size:16px;font-weight:700;min-width:0}
-.obj{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:20px;background:var(--surf);border:0;width:100%;text-align:left}
+.search{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}.search input{flex:1 1 220px;height:48px;border:0;border-radius:var(--r-pill,999px);background:var(--surf);padding:0 18px;font-size:16px;font-weight:700;min-width:0}
+.obj{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r-lg,20px);background:var(--surf);border:0;width:100%;text-align:left}
 .obj .tx{flex:1;min-width:0}.obj b{display:block;font-size:14.5px;font-weight:800}.obj span{font-size:12.5px;font-weight:700;color:var(--ink2)}
 .obj.off{opacity:.6}
 /* lapas */
 .sheet-bg{position:fixed;inset:0;z-index:50;background:rgba(8,20,16,.45);display:flex;align-items:flex-end;justify-content:center}
 @media(min-width:700px){.sheet-bg{align-items:center}}
-.sheet{width:min(560px,100%);max-height:92vh;overflow:auto;background:var(--bg);border-radius:28px 28px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom))}
-@media(min-width:700px){.sheet{border-radius:28px}}
+.sheet{width:min(560px,100%);max-height:92vh;overflow:auto;background:var(--bg);border-radius:var(--r-xl,28px) var(--r-xl,28px) 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom))}
+@media(min-width:700px){.sheet{border-radius:var(--r-xl,28px)}}
 .sheet .hd{display:flex;align-items:center;gap:10px;margin:0 0 14px}.sheet .hd h3{margin:0;flex:1;font-size:20px;font-weight:800;letter-spacing:-.02em}
 .f{margin:0 0 12px}.f label,.f .lb{display:block;font-size:13px;font-weight:800;color:var(--ink2);margin:0 0 6px 4px}
-.f input,.f select,.f textarea{width:100%;height:48px;border:0;border-radius:16px;background:var(--surf);padding:0 16px;font-size:16px;font-weight:700}
+.f input,.f select,.f textarea{width:100%;height:48px;border:0;border-radius:var(--r-lg,20px);background:var(--surf);padding:0 16px;font-size:16px;font-weight:700}
 .f textarea{height:auto;min-height:80px;padding:12px 16px}
 .row2{display:flex;gap:8px}.row2>*{flex:1;min-width:0}
 .photos{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-.photos .ph{aspect-ratio:1;border-radius:18px;background:var(--surf) center/cover no-repeat;position:relative}
-.photos .add{aspect-ratio:1;border-radius:18px;border:2px dashed #c9d3ce;background:var(--surf);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12px;font-weight:800}
+.photos .ph{aspect-ratio:1;border-radius:var(--r-lg,20px);background:var(--surf) center/cover no-repeat;position:relative}
+.photos .add{aspect-ratio:1;border-radius:var(--r-lg,20px);border:2px dashed #c9d3ce;background:var(--surf);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12px;font-weight:800}
 .photos .ph button{position:absolute;top:4px;right:4px;width:32px;height:32px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff}
-.checks{border-radius:22px;background:var(--surf);padding:4px}
+.checks{border-radius:var(--r-xl,28px);background:var(--surf);padding:4px}
 .checks label{display:flex;align-items:center;gap:12px;min-height:48px;padding:0 12px;font-size:15px;font-weight:700}
 .checks input{width:22px;height:22px;accent-color:var(--ink);margin:0}
-.chips{display:flex;flex-wrap:wrap;gap:6px}.chips button{min-height:44px;padding:0 14px;border:0;border-radius:999px;background:var(--surf);font-size:13.5px;font-weight:800}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips button{min-height:44px;padding:0 14px;border:0;border-radius:var(--r-pill,999px);background:var(--surf);font-size:13.5px;font-weight:800}
 .chips button.on{background:var(--dark);color:var(--ondark)}
 .acts{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:8px;margin-top:14px}
-.acts button{min-height:56px;border:0;border-radius:999px;font-size:16px;font-weight:800}
+.acts button{min-height:56px;border:0;border-radius:var(--r-pill,999px);font-size:16px;font-weight:800}
 .btn-dk{background:var(--dark);color:var(--ondark)}.btn-rose{background:var(--rose)}.btn-lt{background:var(--surf)}
-.thumbs{display:flex;gap:6px;margin-top:6px}.thumbs img{width:56px;height:56px;border-radius:12px;object-fit:cover;background:var(--surf2)}
+.thumbs{display:flex;gap:6px;margin-top:6px}.thumbs img{width:56px;height:56px;border-radius:var(--r-md,14px);object-fit:cover;background:var(--surf2)}
 .gate{min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding:20px}
 .gate .card{width:min(380px,100%);text-align:center;padding:28px 22px}
-.gate input{width:100%;height:56px;border:0;border-radius:18px;background:var(--surf2);text-align:center;font-size:22px;font-weight:800;margin:14px 0 10px}
+.gate input{width:100%;height:56px;border:0;border-radius:var(--r-lg,20px);background:var(--surf2);text-align:center;font-size:22px;font-weight:800;margin:14px 0 10px}
 .gate input::placeholder{font-size:16px;font-weight:700;color:var(--ink3)}
 .gate .err{min-height:20px;color:var(--bad);font-weight:700;font-size:13.5px}
-.toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:80;max-width:calc(100% - 32px);padding:12px 18px;border-radius:999px;background:var(--dark);color:var(--ondark);font-weight:800;font-size:14px}
+.toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:80;max-width:calc(100% - 32px);padding:12px 18px;border-radius:var(--r-pill,999px);background:var(--dark);color:var(--ondark);font-weight:800;font-size:14px}
 .toast.err{background:#8a2a3b;color:#fff}
-.skel{height:64px;border-radius:22px;background:var(--surf);opacity:.6;margin-bottom:8px}
+.skel{height:64px;border-radius:var(--r-xl,28px);background:var(--surf);opacity:.6;margin-bottom:8px}
 .copy{text-align:center;font-size:11px;font-weight:700;color:var(--ink3);margin:24px 0 0}
 </style>
 <style>
@@ -124,11 +126,12 @@ button{cursor:pointer}
 .call{display:flex;flex-wrap:wrap;align-items:center;gap:10px}.call .tx{flex:1 1 220px;min-width:0}
 .call .tx b{display:block;font-size:16px;font-weight:800}.call .tx span{font-size:13px;font-weight:700;color:var(--ink2)}
 .wxrow{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 0 12px}.wxrow::-webkit-scrollbar{display:none}
-.wxrow div{flex:none;min-width:84px;padding:10px 12px;border-radius:18px;background:var(--surf);font-size:12px;font-weight:700;color:var(--ink2)}
+.wxrow div{flex:none;min-width:84px;padding:10px 12px;border-radius:var(--r-lg,20px);background:var(--surf);font-size:12px;font-weight:700;color:var(--ink2)}
 @media(max-width:430px){.tabs{padding:5px;gap:2px}.tabs button{font-size:12px;padding:0 2px}}
 .wxrow div b{display:block;font-size:15px;font-weight:800;color:var(--ink)}.wxrow div.hi{background:var(--sand)}
 </style>
-<style id="sh-polish">/* pieskāriena sajūta, iPhone pietuvinājums, samazināta kustība */
+<style id="sh-polish">
+@media (min-width:1000px){.list:not(:has(.stop)){display:grid;grid-template-columns:repeat(auto-fill,minmax(400px,1fr));gap:10px;align-items:start}}   /* datorā saraksti kolonnās (maršruts paliek secībā) *//* pieskāriena sajūta, iPhone pietuvinājums, samazināta kustība */
 button:not(:disabled):active{scale:.97}
 button,.chip,.tab{-webkit-user-select:none;user-select:none;touch-action:manipulation}
 @media (max-width:600px){input:not([type=checkbox]):not([type=radio]),select,textarea{font-size:16px!important}}
@@ -251,7 +254,7 @@ async function applyQ(r) {
     if (x.action === 'cant') { v.statuss = 'cant'; v.iemesls = (x.data.iemesls || '') + ' · gaida internetu'; v.pending = 1; } });
 }
 function offBar() {
-  let b = $('offBar'); if (!b) { b = document.createElement('div'); b.id = 'offBar'; b.style.cssText = 'margin:0 0 12px;padding:10px 14px;border-radius:18px;background:var(--sand);font-weight:800;font-size:13.5px;display:flex;gap:10px;align-items:center;justify-content:space-between'; $('view').before(b); }
+  let b = $('offBar'); if (!b) { b = document.createElement('div'); b.id = 'offBar'; b.style.cssText = 'margin:0 0 12px;padding:10px 14px;border-radius:var(--r-lg,20px);background:var(--sand);font-weight:800;font-size:13.5px;display:flex;gap:10px;align-items:center;justify-content:space-between'; $('view').before(b); }
   const t = [S.off ? 'Bezsaistē · dati no ' + new Date(S.off).toLocaleTimeString('lv-LV', { hour: '2-digit', minute: '2-digit' }) : '', S.qn ? S.qn + (S.qn === 1 ? ' atzīme gaida' : ' atzīmes gaida') + ' internetu' : ''].filter(Boolean).join(' · ');
   b.hidden = !t; b.innerHTML = t ? `<span>${esc(t)}</span>${S.qn && navigator.onLine ? '<button class="pill" id="qGo" style="min-height:36px">Sūtīt tagad</button>' : ''}` : '';
   const g = $('qGo'); if (g) g.onclick = flushQ;
@@ -464,9 +467,9 @@ function noticePrint(x) {
     @page{size:A4;margin:16mm}*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
     body{font-family:Manrope,-apple-system,"Segoe UI",Arial,sans-serif;color:#17201c;margin:0;padding:32px}
     .top{display:flex;align-items:center;gap:12px;margin:0 0 22px}.top b{display:block;font-size:16px;font-weight:800}.top small{color:#6d7672;font-weight:700;font-size:13px}
-    .band{background:#f4e4b4;border-radius:22px;padding:28px 30px;margin:0 0 22px}.band h1{margin:0;font-size:52px;font-weight:800;letter-spacing:-.03em;line-height:1}.band p{margin:8px 0 0;font-size:20px;font-weight:700;color:#4a534f}
-    .when{background:#17201c;color:#fff;border-radius:22px;padding:24px 30px;margin:0 0 22px}.when small{display:block;font-size:14px;font-weight:700;opacity:.7;text-transform:uppercase;letter-spacing:.06em}.when b{display:block;font-size:34px;font-weight:800;letter-spacing:-.02em;margin-top:4px}
-    p.t{font-size:22px;line-height:1.5;font-weight:600;margin:0 0 22px}.card{background:#f3f5f4;border-radius:18px;padding:18px 22px;font-size:17px;font-weight:700}
+    .band{background:#f4e4b4;border-radius:var(--r-xl,28px);padding:28px 30px;margin:0 0 22px}.band h1{margin:0;font-size:52px;font-weight:800;letter-spacing:-.03em;line-height:1}.band p{margin:8px 0 0;font-size:20px;font-weight:700;color:#4a534f}
+    .when{background:#17201c;color:#fff;border-radius:var(--r-xl,28px);padding:24px 30px;margin:0 0 22px}.when small{display:block;font-size:14px;font-weight:700;opacity:.7;text-transform:uppercase;letter-spacing:.06em}.when b{display:block;font-size:34px;font-weight:800;letter-spacing:-.02em;margin-top:4px}
+    p.t{font-size:22px;line-height:1.5;font-weight:600;margin:0 0 22px}.card{background:#f3f5f4;border-radius:var(--r-lg,20px);padding:18px 22px;font-size:17px;font-weight:700}
     .foot{display:flex;justify-content:space-between;border-top:1px solid #dfe5e2;margin-top:40px;padding-top:10px;font-size:12px;color:#6d7672}@media print{body{padding:0}}</style></head>
     <body><div class="top">${logo}<div><b>SELECTUM HOME</b><small>Paziņojums iedzīvotājiem</small></div></div>
     <div class="band"><h1>PAZIŅOJUMS</h1><p>${esc(x.adrese)} · pazemes stāvvieta</p></div>
@@ -630,7 +633,7 @@ async function drawMap(v) {
   const day = SNOW ? D.visits.filter(x => x.izs === S.call) : D.visits.filter(x => x.datums === d), byA = {}; day.forEach(x => byA[x.anorm] = x);
   const objs = D.objects.filter(active), withC = objs.filter(o => o.lat), noC = objs.filter(o => o.lat == null).length;
   const seg = SNOW ? '' : `<div class="seg" style="margin:0 0 12px">${[0, 1, 2].map(i => addDays(D.today, i)).concat(D.visits.some(x => x.datums === d) && [0, 1, 2].every(i => addDays(D.today, i) !== d) ? [d] : []).map(x => `<button type="button" data-d="${x}" class="${x === d ? 'on' : ''}">${x === D.today ? 'Šodien' : x === addDays(D.today, 1) ? 'Rīt' : WD[dow(x) - 1] + ' ' + lvS(x)}</button>`).join('')}</div>`;
-  v.innerHTML = `${seg}<div class="grid2"><div class="main"><div id="map" style="height:min(62vh,620px);border-radius:28px;overflow:hidden;background:var(--surf)"></div>
+  v.innerHTML = `${seg}<div class="grid2"><div class="main"><div id="map" style="height:min(62vh,620px);border-radius:var(--r-xl,28px);overflow:hidden;background:var(--surf)"></div>
       <div class="legend"><span><i style="background:#3f7d5a;border-radius:50%"></i>${esc(APP.doneL)}</span><span><i style="background:#17201c;border-radius:50%"></i>${SNOW ? 'Maršrutā' : 'Ieplānots šai dienai'}</span><span><i style="background:#c98a00;border-radius:50%"></i>${SNOW ? 'Tīra tagad' : 'Pārcelts'}</span><span><i style="background:#b9c2bd;border-radius:50%"></i>Citi objekti</span></div></div>
       <div class="side"><div class="card" style="margin:0 0 8px"><b style="font-weight:800">${day.length} ${SNOW ? 'adreses izsaukumā' : 'izbraukumi · ' + qf(day.reduce((n, x) => n + (+((S.objBy[x.anorm] || {}).qty) || 0), 0))}</b>
         <p style="margin:4px 0 0;font-size:13px;font-weight:700;color:var(--ink2)">${withC.length} no ${objs.length} objektiem uz kartes${noC ? ' · ' + noC + ' vēl bez koordinātām' : ''}</p>
@@ -656,7 +659,7 @@ async function drawMap(v) {
 function drawRules(v) {
   const C = S.D.cfg; $('hdTitle').textContent = 'Noteikumi';
   const fld = (id, l, val, attrs) => `<div class="f"><label for="${id}">${l}</label><input id="${id}" value="${esc(val)}" ${attrs || 'type="number"'}></div>`;
-  const veidi = `<div class="card f"><span class="lb">Darbu saraksts (atzīmē pēc darba, ar komatu)</span><input id="cV" value="${esc((C.veidi || []).join(', '))}" style="width:100%;height:48px;border:0;border-radius:16px;background:var(--surf2);padding:0 16px;font-size:16px;font-weight:700"></div>`;
+  const veidi = `<div class="card f"><span class="lb">Darbu saraksts (atzīmē pēc darba, ar komatu)</span><input id="cV" value="${esc((C.veidi || []).join(', '))}" style="width:100%;height:48px;border:0;border-radius:var(--r-lg,20px);background:var(--surf2);padding:0 16px;font-size:16px;font-weight:700"></div>`;
   const main = SNOW ? `<div class="card sky" style="margin:0 0 12px"><b style="font-size:15px;font-weight:800">Ik 3 stundas sistēma pārbauda sniega prognozi</b>
       <p style="margin:4px 0 0;font-size:13px;font-weight:700;color:var(--ink2)">Ja šodien vai rīt prognozē ≥ slieksni, izveidojas izsaukums. Ar apstiprināšanu — vadītājs to apstiprina vai atceļ; bez — traktoristi maršrutus saņem uzreiz. Vadītājs var izsaukt arī ar pogu.</p></div>
       <div class="card f"><span class="lb">Sniegs</span><div class="row2">${fld('cSn', 'Izsaukt, ja sniegs ≥ (cm/dienā)', C.snowCm, 'type="number" step="0.5" min="0.5"')}</div></div>
