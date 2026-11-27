@@ -481,6 +481,20 @@ function drawDay(v) {
 }
 
 /* ---------- Izpilde ---------- */
+/* ---------- I4 «Pamanīju bojājumu» → Mājas lietas pieteikums (ml_req, avots «darbinieks»), push objekta vadītājam ---------- */
+const BOJ_KAT = ['Bojājums', 'Tīrība / atkritumi', 'Apgaismojums', 'Durvis / slēdzene', 'Lifts', 'Ūdens / noplūde', 'Apkure', 'Teritorija / sniegs / ledus', 'Cits'];
+const BOJ_RU = { 'Bojājums': 'Повреждение', 'Tīrība / atkritumi': 'Чистота / мусор', 'Apgaismojums': 'Освещение', 'Durvis / slēdzene': 'Двери / замок', 'Lifts': 'Лифт', 'Ūdens / noplūde': 'Вода / протечка', 'Apkure': 'Отопление', 'Teritorija / sniegs / ledus': 'Территория / снег / лёд', 'Cits': 'Другое' };
+function bojSheet(x) {
+  let foto = '';
+  const s = sheet(`<div class="hd"><h3>${tr('Pamanīju bojājumu', 'Заметил повреждение')}</h3>${X}</div><p style="margin:0 0 10px;font-weight:700;overflow-wrap:anywhere">${esc(x.adrese)}</p>
+    <div class="f"><label for="bjK">${tr('Kategorija', 'Категория')}</label><select id="bjK">${BOJ_KAT.map(k => `<option value="${esc(k)}">${esc(tr(k, BOJ_RU[k] || k))}</option>`).join('')}</select></div>
+    <div class="f"><label for="bjT">${tr('Kas bojāts un kur', 'Что повреждено и где')}</label><textarea id="bjT" maxlength="1000" rows="3"></textarea></div>
+    <div class="f"><label for="bjP">${tr('Bilde (ieteicams)', 'Фото (желательно)')}</label><input id="bjP" type="file" accept="image/*"></div>
+    <div class="acts"><button class="btn-lt" data-x>${tr('Atcelt', 'Отмена')}</button><button class="btn-dk" id="bjGo">${tr('Nosūtīt vadītājam', 'Отправить руководителю')}</button></div>`);
+  s.querySelector('#bjP').onchange = async (e) => { const f = e.target.files[0]; if (!f) return; try { foto = await shrink(f, 1600); } catch (er) { toast(er.message, 'err'); } };
+  s.querySelector('#bjGo').onclick = async (e) => { const t = s.querySelector('#bjT').value.trim(); if (t.length < 5) return toast(tr('Aprakstiet bojājumu', 'Опишите повреждение'), 'err');
+    e.target.disabled = true; try { await api('boj', { adrese: x.adrese, id: x.id, kategorija: s.querySelector('#bjK').value, teksts: t, foto }); closeSheet(); toast(tr('Nosūtīts vadītājam ✓', 'Отправлено руководителю ✓')); } catch (er) { e.target.disabled = false; toast(er.message, 'err'); } };
+}
 function shrink(file, max) {
   return new Promise((res, rej) => { const img = new Image(), u = URL.createObjectURL(file);
     img.onload = () => { const k = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
@@ -602,7 +616,7 @@ async function openVisit0(id) {
     <div class="f"><span class="lb">Bilde pēc darba${C.photoReq ? ' · obligāta' : ''}</span><div class="photos" id="phA"></div></div>
     <div class="f"><label for="vNote">Piezīme vadītājam</label><input id="vNote" placeholder="Piem. bojāts…" value="${esc(P.note || '')}"></div>
     <div class="f"><span class="lb">${esc(DONE.cantL || 'Nevar izpildīt? Adrese pārcelsies pati')}</span><div class="chips" id="why">${whys.map(w => `<button type="button" data-w="${w}">${w}</button>`).join('')}</div></div>
-    <div class="acts"><button class="btn-rose" id="vCant">Nevar</button><button class="btn-dk" id="vDone">${esc(APP.doneBtn)}</button></div>`);
+    <div class="acts"><button class="btn-rose" id="vCant">Nevar</button><button class="btn-dk" id="vDone">${esc(APP.doneBtn)}</button></div><button type="button" class="btn-lt" id="vBoj" style="width:100%;margin-top:10px">${tr('Pamanīju bojājumu', 'Заметил повреждение')}</button>`);
   s.parentElement.dataset.keep = '1';   // fona pieskāriens neaizver darba logu
   DONE.bindTools(s, x); DONE.bind(s, x, o, od, rd); thrBlock(x, s);
   if (P.why) s.querySelectorAll('#why button').forEach(z => z.classList.toggle('on', z.dataset.w === P.why));
@@ -619,6 +633,7 @@ async function openVisit0(id) {
     busy(e.target, 'Augšupielādē…');
     try { await act('done', { id, checks: chkGet(s), photos: P.after, photosBefore: P.before, izpilde: iz, sakums: x.sakums || '', piezime: s.querySelector('#vNote').value.trim() }); delete S.draft[id]; draftDel(id); closeSheet(); toast(APP.doneL + ' ✓'); await load(); nextSheet(x); } catch (err) { toast(err.message, 'err'); unbusy(e.target); }
   };
+  s.querySelector('#vBoj').onclick = () => bojSheet(x);
   s.querySelector('#vCant').onclick = async (e) => {
     if (!P.why) { s.querySelector('#why').scrollIntoView({ behavior: 'smooth', block: 'center' }); return toast('Izvēlieties iemeslu', 'err'); }
     busy(e.target, '…');
