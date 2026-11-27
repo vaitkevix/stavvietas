@@ -17,9 +17,9 @@
 :root{--r-base:14px;--r-xs:calc(var(--r-base)*.5);--r-sm:calc(var(--r-base)*.72);--r-md:var(--r-base);--r-lg:calc(var(--r-base)*1.43);--r-xl:calc(var(--r-base)*2);--r-pill:999px}/*SH rādiusi: maini --r-base*/
 
 :root{--bg:#f1f4f2;--surf:#fff;--surf2:#f3f5f4;--ink:#17201c;--ink2:#4a534f;--ink3:#6d7672;--dark:#17201c;--ondark:#fff;
-  --mint:#d6e8e1;--sand:#f4e4b4;--sky:#d8e6f2;--rose:#f5dbe3;--lilac:#e2ddf2;--ok:#2f5d45;--warn:#6b4a00;--bad:#8a2a3b}
+  --mint:#d6e8e1;--sand:#f4e4b4;--sky:#d8e6f2;--rose:#f5dbe3;--lilac:#e2ddf2;--peach:#f8dcc6;--ok:#2f5d45;--warn:#6b4a00;--bad:#8a2a3b}
 :root[data-theme="dark"]{--bg:#0b120f;--surf:#151d1a;--surf2:#1b2521;--ink:#eef2ef;--ink2:#b4bdb8;--ink3:#8b958f;--dark:#eef2ef;--ondark:#0b120f;
-  --mint:#1e3a32;--sand:#3d3520;--sky:#1e2f3d;--rose:#3d2530;--lilac:#2c2840;--ok:#8fd1ad;--warn:#f0c46b;--bad:#f3a0b0}
+  --mint:#1e3a32;--sand:#3d3520;--sky:#1e2f3d;--rose:#3d2530;--lilac:#2c2840;--peach:#40291b;--ok:#8fd1ad;--warn:#f0c46b;--bad:#f3a0b0}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
 button,input,select,textarea{font:inherit;color:inherit}
@@ -119,7 +119,7 @@ button{cursor:pointer}
 .copy{text-align:center;font-size:11px;font-weight:700;color:var(--ink3);margin:24px 0 0}
 </style>
 <style>
-.top .lg{background:var(--sand)}
+.top .lg{background:var(--peach)}
 .stop .st{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
 .chip.w{background:var(--sand);color:var(--warn)}.chip.ok{background:var(--mint);color:var(--ok)}.chip.bad{background:var(--rose);color:var(--bad)}
 .crew{margin:0 0 14px}.crew h3{margin:0 0 8px;font-size:17px;font-weight:800;display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -131,7 +131,8 @@ button{cursor:pointer}
 .wxrow div b{display:block;font-size:15px;font-weight:800;color:var(--ink)}.wxrow div.hi{background:var(--sand)}
 </style>
 <style id="sh-polish">
-@media (min-width:1000px){.list:not(:has(.stop)){display:grid;grid-template-columns:repeat(auto-fill,minmax(400px,1fr));gap:10px;align-items:start}}   /* datorā saraksti kolonnās (maršruts paliek secībā) *//* pieskāriena sajūta, iPhone pietuvinājums, samazināta kustība */
+@media (min-width:1000px){.list:not(:has(.stop)){display:grid;grid-template-columns:repeat(auto-fill,minmax(min(400px,100%),1fr));gap:10px;align-items:start}}   /* datorā saraksti kolonnās (maršruts paliek secībā) *//* pieskāriena sajūta, iPhone pietuvinājums, samazināta kustība */
+:root[data-theme="dark"] .bar{background:rgba(255,255,255,.14)}:root[data-theme="dark"] .photos .add{border-color:#3a4641}#cWd button{min-width:44px}
 button:not(:disabled):active{scale:.97}
 button,.chip,.tab{-webkit-user-select:none;user-select:none;touch-action:manipulation}
 @media (max-width:600px){input:not([type=checkbox]):not([type=radio]),select,textarea{font-size:16px!important}}
@@ -350,7 +351,7 @@ function photoBox(s, sel, arr, max) {
 /* Navigācija uz adresi */
 function navBtns(o, adrese) { const q = o && o.lat ? o.lat + ',' + o.lng : String(adrese || '').replace(/^\s*(j|vn[iī])\s*\|\s*/i, '') + ', Latvija';
   return `<div style="display:flex;gap:8px;margin:0 0 12px"><a class="pill" href="https://waze.com/ul?${o && o.lat ? 'll=' + q : 'q=' + encodeURIComponent(q)}&navigate=yes" target="_blank" rel="noopener">Braukt · Waze</a><a class="pill" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(q)}" target="_blank" rel="noopener">Google Maps</a></div>`; }
-const thumbs = (ids, alt) => String(ids || '').split(',').filter(Boolean).map(p => `<a href="${IMG.replace('w400', 'w1600') + encodeURIComponent(p)}" target="_blank" rel="noopener"><img src="${IMG + encodeURIComponent(p)}" alt="${alt}"></a>`).join('');
+const thumbs = (ids, alt) => String(ids || '').split(',').filter(Boolean).map(p => `<a href="${IMG.replace('w400', 'w1600') + encodeURIComponent(p)}" target="_blank" rel="noopener"><img src="${IMG + encodeURIComponent(p)}" loading="lazy" decoding="async" alt="${alt}"></a>`).join('');
 const nowHM = () => new Date().toTimeString().slice(0, 5);
 const mins = (a, b) => { if (!/^\d\d:\d\d$/.test(a || '') || !/^\d\d:\d\d$/.test(b || '')) return 0; let m = (+b.slice(0, 2) * 60 + +b.slice(3)) - (+a.slice(0, 2) * 60 + +a.slice(3)); if (m < 0) m += 1440; return m; };
 const hf = (m) => (Math.round(m / 6) / 10).toLocaleString('lv-LV') + ' h';
@@ -580,7 +581,7 @@ async function objCard(o) {
   try {
     const h = (await api('obj', { anorm: o.anorm })).hist;
     const ph = h.filter(x => x.foto).flatMap(x => x.foto.split(',').filter(Boolean).map(id => ({ id, d: x.datums })));
-    s.querySelector('#oPh').innerHTML = ph.slice(0, 12).map(p => `<a href="${IMG.replace('w400', 'w1600') + encodeURIComponent(p.id)}" target="_blank" rel="noopener" title="${lvS(p.d)}"><img src="${IMG + encodeURIComponent(p.id)}" alt="Bilde ${lvS(p.d)}" style="width:96px;height:96px"></a>`).join('') || '<span style="font-weight:700;color:var(--ink3)">Vēl nav bilžu</span>';
+    s.querySelector('#oPh').innerHTML = ph.slice(0, 12).map(p => `<a href="${IMG.replace('w400', 'w1600') + encodeURIComponent(p.id)}" target="_blank" rel="noopener" title="${lvS(p.d)}"><img src="${IMG + encodeURIComponent(p.id)}" loading="lazy" decoding="async" alt="Bilde ${lvS(p.d)}" style="width:96px;height:96px"></a>`).join('') || '<span style="font-weight:700;color:var(--ink3)">Vēl nav bilžu</span>';
     const SL = { done: [APP.doneL, 'var(--ok)'], plan: ['Ieplānots', 'var(--ink2)'], cant: ['Nevarēja', 'var(--bad)'] };
     s.querySelector('#oHist').innerHTML = h.map((x, i) => `<div style="display:flex;justify-content:space-between;gap:8px;padding:10px 0;font-size:13.5px;font-weight:700;${i ? 'border-top:1px solid var(--surf2)' : ''}">
       <span>${WD[dow(x.datums) - 1]}, ${lvS(x.datums)}${x.izpilditajs ? ' · ' + esc(x.izpilditajs) : ''}${x.iemesls ? ' · ' + esc(x.iemesls) : ''}</span><span style="font-weight:800;color:${(SL[x.statuss] || SL.plan)[1]}">${(SL[x.statuss] || SL.plan)[0]}${x.parcelts ? ' · pārc. ' + x.parcelts + '×' : ''}</span></div>`).join('') || '<div class="empty" style="padding:14px">Vēl nav izbraukumu</div>';
