@@ -117,6 +117,9 @@ button{cursor:pointer}
 .toast.err{background:#8a2a3b;color:#fff}
 .skel{height:64px;border-radius:var(--r-xl,28px);background:var(--surf);opacity:.6;margin-bottom:8px}
 .copy{text-align:center;font-size:11px;font-weight:700;color:var(--ink3);margin:24px 0 0}
+.clm{margin-top:12px}.clmc{display:flex;flex-direction:column;gap:4px;width:100%;text-align:left;border:0;font:inherit;cursor:pointer;margin:0 0 8px}.clmc b{font-weight:800}.clmc span{font-weight:700;overflow-wrap:anywhere;white-space:pre-wrap}.clmc small{font-size:12.5px;font-weight:700;color:var(--ink3)}
+.clmc.open{background:var(--rose);color:var(--ink)}.clmc.open b{color:var(--bad)}.clmc.fixed{background:var(--mint);color:var(--ink)}.clmc.fixed b{color:var(--ok)}
+.clmb{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;border:0;font:inherit;cursor:pointer;margin:0 0 12px;background:var(--rose);color:var(--ink);min-height:56px}.clmb b{color:var(--bad);font-weight:800}.clmb span{font-size:13.5px;font-weight:700;overflow-wrap:anywhere}
 </style>
 <style>
 .top .lg{background:var(--peach)}
@@ -382,7 +385,60 @@ addEventListener('message', (e) => { const m = e.data; if (e.origin === location
 $('btnMe').onclick = () => { const s = sheet(`<div class="hd"><h3>${esc(S.D.me.name)}</h3>${X}</div><p style="font-weight:700;color:var(--ink2);margin:0 0 14px">${esc(ROLE[S.D.me.role] || '')}</p><button class="pill big" style="width:100%" id="mOut">Iziet</button>`);
   s.querySelector('#mOut').onclick = logout; };
 
-function draw() { const r = draw0(); if (S.tab === 'today') { ruDom($('view')); ruDom($('hdTitle')); } return r; }
+function draw() { const r = draw0(); if (S.tab === 'today') { claimBanner(); ruDom($('view')); ruDom($('hdTitle')); } return r; }
+/* ---------- E3 pretenzijas: vadītājs pie izpildīta darba «Pretenzija» (teksts + bilde) → izpildītājs «Labots» ar jaunu bildi. Kamēr atvērta — darbs neiet aktā/rēķinā ---------- */
+const clTh = (ids, alt) => String(ids || '').split(',').filter(Boolean).map(p => `<a href="${IMG.replace('w400', 'w1600') + encodeURIComponent(p)}" target="_blank" rel="noopener"><img src="${IMG + encodeURIComponent(p)}" loading="lazy" decoding="async" alt="${alt}"></a>`).join('');
+const clOf = (vid) => { const L = (S.D && S.D.claims) || []; return L.find(c => c.visit === vid && c.statuss === 'atverta') || L.find(c => c.visit === vid); };
+const clOpen = () => ((S.D && S.D.claims) || []).filter(c => c.statuss === 'atverta');
+function claimBlock(x, el) {
+  if (!el) return; const c = clOf(x.id), d = document.createElement('div'); d.className = 'clm';
+  if (c) d.innerHTML = `<button type="button" class="card clmc ${c.statuss === 'atverta' ? 'open' : 'fixed'}" id="clView"><b>${c.statuss === 'atverta' ? '⚠ Pretenzija — jālabo' : '✓ Pretenzija atrisināta'}</b><span>${esc(c.teksts)}</span></button>`;
+  else if (can('vaditajs')) d.innerHTML = '<button type="button" class="btn-rose" id="clNew" style="width:100%">Pretenzija</button>';
+  else return;
+  el.appendChild(d);
+  if (c) d.querySelector('#clView').onclick = () => claimView(c);
+  else d.querySelector('#clNew').onclick = () => claimForm(x, null);
+}
+function claimView(c) {
+  sheet(`<div class="hd"><h3>${c.statuss === 'atverta' ? 'Pretenzija' : 'Pretenzija atrisināta'}</h3>${X}</div><p style="font-weight:800;margin:0 0 4px;overflow-wrap:anywhere">${esc(c.adrese)} · ${esc(lvS(c.datums))}</p>
+    <div class="card clmc open f" style="cursor:default"><span>${esc(c.teksts)}</span><small>${esc(c.kas)} · ${esc(String(c.laiks).slice(8, 10) + '.' + String(c.laiks).slice(5, 7) + '. ' + String(c.laiks).slice(11, 16))}</small></div>
+    ${c.foto ? `<div class="thumbs f">${clTh(c.foto, 'Pretenzijas bilde')}</div>` : ''}
+    ${c.statuss !== 'atverta' ? `<div class="card clmc fixed f" style="cursor:default"><b>Laboja ${esc(c.lab_kas)}</b>${c.lab_piez ? `<span>${esc(c.lab_piez)}</span>` : ''}<small>${esc(String(c.lab_laiks).slice(0, 16))}</small></div><div class="thumbs">${clTh(c.lab_foto, 'Bilde pēc labošanas')}</div>`
+      : can('izpilditajs') ? '<button type="button" class="btn-dk" id="clFix" style="width:100%">Labots — pievienot bildi</button>' : ''}`);
+  const f = $('clFix'); if (f) f.onclick = () => claimForm(null, c);
+}
+function claimForm(x, c) {
+  const P = []; let busyP = 0;
+  const s = sheet(`<div class="hd"><h3>${c ? 'Labots' : 'Pretenzija'}</h3>${X}</div><p style="font-weight:800;margin:0 0 10px;overflow-wrap:anywhere">${esc((x || c).adrese)} · ${esc(lvS((x || c).datums))}</p>
+    ${c ? `<div class="card clmc open f" style="cursor:default"><span>${esc(c.teksts)}</span></div>` : ''}
+    <div class="f"><label for="clT">${c ? 'Piezīme (nav obligāta)' : 'Kas nav kārtībā'}</label>${c ? '<input id="clT" maxlength="300">' : '<textarea id="clT" maxlength="1000" rows="3" style="width:100%" placeholder="Piem. logi 2. stāvā palikuši netīri"></textarea>'}</div>
+    <div class="f"><span class="lb">${c ? 'Bilde pēc labošanas · obligāta' : 'Bilde (ieteicams)'}</span><div class="photos" id="clPh"></div><input type="file" id="clIn" accept="image/*" capture="environment" multiple hidden><input type="file" id="clG" accept="image/*" multiple hidden></div>
+    <div class="acts"><button class="btn-lt" data-x>Atcelt</button><button class="${c ? 'btn-dk' : 'btn-rose'}" id="clGo">${c ? 'Labots' : 'Iesniegt pretenziju'}</button></div>`);
+  s.parentElement.dataset.keep = '1';
+  const drawP = () => { s.querySelector('#clPh').innerHTML = P.map((p, i) => `<div class="ph" style="background-image:url('${p}')"><button type="button" data-rm="${i}" aria-label="Noņemt bildi">×</button></div>`).join('')
+    + (P.length < 4 ? '<button type="button" class="add" id="clAdd">+ Bilde</button><button type="button" class="add" id="clGal">Galerija</button>' : ''); };
+  drawP();
+  s.querySelector('#clPh').onclick = (e) => { const rm = e.target.closest('[data-rm]'); if (rm) { P.splice(+rm.dataset.rm, 1); drawP(); return; } if (e.target.closest('#clAdd')) s.querySelector('#clIn').click(); if (e.target.closest('#clGal')) s.querySelector('#clG').click(); };
+  const add = async (e) => { busyP++; try { for (const f of [...e.target.files].slice(0, 4 - P.length)) { try { P.push(await shrink(f, 1400)); } catch (err) { toast(err.message, 'err'); } } } finally { busyP--; } e.target.value = ''; drawP(); };
+  s.querySelector('#clIn').onchange = add; s.querySelector('#clG').onchange = add;
+  s.querySelector('#clGo').onclick = async (e) => {
+    if (busyP) return toast('Bilde vēl apstrādājas — pagaidiet sekundi', 'err');
+    const t = s.querySelector('#clT').value.trim();
+    if (!c && t.length < 3) return toast('Aprakstiet, kas nav kārtībā', 'err'); if (c && !P.length) return toast('Pievienojiet bildi pēc labošanas', 'err');
+    const b = e.target; b.disabled = true; b.textContent = 'Sūta…';
+    try { const r = await api(c ? 'claimFix' : 'claim', c ? { cid: c.id, photos: P, piezime: t } : { id: x.id, teksts: t, photos: P }); S.D.claims = r.claims || S.D.claims; closeSheet(); toast(c ? 'Atzīmēts: labots ✓' : 'Pretenzija nosūtīta izpildītājam'); draw(); }
+    catch (err) { toast(err.message, 'err'); b.disabled = false; b.textContent = c ? 'Labots' : 'Iesniegt pretenziju'; }
+  };
+}
+function claimBanner() {
+  const v = $('view'); if (!v || S.tab !== 'today' || !S.D) return; const old = v.querySelector('.clmb'); if (old) old.remove();
+  const L = clOpen(); if (!L.length || !(can('izpilditajs') || can('vaditajs'))) return;
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'card clmb'; b.innerHTML = `<b>⚠ Pretenzijas · ${L.length}</b><span>${can('vaditajs') ? 'Gaida izpildītāja labojumu' : 'Jālabo un jāpievieno bilde'}: ${esc(L.slice(0, 3).map(c => c.adrese).join(', '))}${L.length > 3 ? '…' : ''}</span>`;
+  b.onclick = () => { if (L.length === 1) return claimView(L[0]); sheet(`<div class="hd"><h3>Pretenzijas · ${L.length}</h3>${X}</div><div class="list">${L.map(c => `<button type="button" class="card clmc open" data-cl="${esc(c.id)}"><b>${esc(c.adrese)} · ${esc(lvS(c.datums))}</b><span>${esc(c.teksts)}</span></button>`).join('')}</div>`);
+    $('sheetBg').querySelectorAll('[data-cl]').forEach(x => x.onclick = () => claimView(L.find(c => c.id === x.dataset.cl))); };
+  v.insertBefore(b, v.firstChild);
+}
+
 function draw0() {
   const v = $('view');
   if (S.tab === 'today') return drawDay(v);
@@ -488,6 +544,7 @@ async function openVisit0(id) {
     sheet(head + `<p style="font-weight:800;margin:0 0 6px">${esc(APP.doneL)} ${esc(lvS(x.datums))} ${esc(x.sakums ? x.sakums + '–' : '')}${esc(x.laiks)} · ${esc(x.izpilditajs)}</p>
       <div class="card f" style="font-weight:700;font-size:14px">${DONE.show(iz, x) || 'Bez papildu datiem'}</div>${x.piezime ? `<p style="font-weight:700;color:var(--ink2);margin:0 0 8px">${esc(x.piezime)}</p>` : ''}
       ${x.foto_pirms ? `<span class="lb">Pirms</span><div class="thumbs" style="margin:0 0 10px">${thumbs(x.foto_pirms, 'Bilde pirms darba')}</div>` : ''}<span class="lb">Pēc</span><div class="thumbs">${thumbs(x.foto, 'Bilde pēc darba') || '<span style="font-weight:700;color:var(--ink3)">Bez bildes</span>'}</div>`);
+    claimBlock(x, document.querySelector('#sheetBg .sheet'));
     return;
   }
   if (x.statuss === 'cant') {
